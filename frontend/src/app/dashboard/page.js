@@ -1,106 +1,99 @@
-'use client';
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export default function DashboardPage() {
-  const [stats, setStats] = useState({});
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Dashboard() {
+  const router = useRouter();
 
-  // Fetch dashboard stats and users
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [statsRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:8080/api/dashboard/stats'),
-          axios.get('http://localhost:8080/api/dashboard/users'),
-        ]);
-        setStats(statsRes.data);
-        setUsers(usersRes.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setLoading(false);
-      }
-    }
+  const handleLogout = () => {
+    // Remove the token from local storage
+    localStorage.removeItem("token");
 
-    fetchData();
-  }, []);
-
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    try {
-      await axios.delete(`http://localhost:8080/api/dashboard/users/${id}`);
-      setUsers(users.filter((user) => user.id !== id));
-    } catch (err) {
-      alert('Error deleting user.');
-    }
+    // Redirect to the login page
+    router.push("/auth/login");
   };
-
-  const handleRoleUpdate = async (id, newRole) => {
-    try {
-      await axios.put(`http://localhost:8080/api/dashboard/users/${id}/role?role=${newRole}`);
-      const updatedUsers = users.map((user) =>
-        user.id === id ? { ...user, role: newRole } : user
-      );
-      setUsers(updatedUsers);
-    } catch (err) {
-      alert('Error updating user role.');
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>📊 Dashboard</h1>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-blue-600 text-white py-4 shadow-md">
+        <div className="container mx-auto flex justify-between items-center px-6">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <nav className="flex gap-4">
+            <Link href="/dashboard" className="hover:underline">
+              Home
+            </Link>
+            <Link href="/dashboard/posts" className="hover:underline">
+              Manage Posts
+            </Link>
+            <Link href="/dashboard/analytics" className="hover:underline">
+              Analytics
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="hover:underline text-white"
+            >
+              Logout
+            </button>
+          </nav>
+        </div>
+      </header>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h2>Statistics</h2>
-        <p><strong>Total Users:</strong> {stats.totalUsers}</p>
-        <p><strong>Total Blogs:</strong> {stats.totalBlogs}</p>
-        <p><strong>Total Comments:</strong> {stats.totalComments}</p>
-      </div>
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-12">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">Welcome to Your Dashboard</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Manage Posts */}
+          <div className="bg-white shadow-md rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+            <h3 className="text-xl font-semibold text-blue-600 mb-2">Manage Posts</h3>
+            <p className="text-gray-600">
+              Create, edit, and delete your blog posts with ease.
+            </p>
+            <Link
+              href="/dashboard/posts"
+              className="mt-4 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Go to Posts
+            </Link>
+          </div>
 
-      <div>
-        <h2>All Users</h2>
-        <table border="1" cellPadding="10">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Change Role</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>
-                  <select
-                    value={user.role}
-                    onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
-                  >
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Author">Author</option>
-                  </select>
-                </td>
-                <td>
-                  <button onClick={() => handleDelete(user.id)}>🗑️</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          {/* View Analytics */}
+          <div className="bg-white shadow-md rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+            <h3 className="text-xl font-semibold text-blue-600 mb-2">View Analytics</h3>
+            <p className="text-gray-600">
+              Track your blog's performance with detailed analytics.
+            </p>
+            <Link
+              href="/dashboard/analytics"
+              className="mt-4 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              View Analytics
+            </Link>
+          </div>
+
+          {/* Settings */}
+          <div className="bg-white shadow-md rounded-lg p-6 hover:scale-105 transition-transform duration-300">
+            <h3 className="text-xl font-semibold text-blue-600 mb-2">Settings</h3>
+            <p className="text-gray-600">
+              Customize your account and application settings.
+            </p>
+            <Link
+              href="/dashboard/settings"
+              className="mt-4 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Go to Settings
+            </Link>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-4 mt-auto">
+        <div className="container mx-auto text-center">
+          <p>&copy; 2025 Inkwave. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
