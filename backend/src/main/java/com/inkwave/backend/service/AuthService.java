@@ -1,5 +1,8 @@
+
 package com.inkwave.backend.service;
 
+import com.inkwave.backend.dto.AuthResponse;
+import com.inkwave.backend.exception.AuthenticationException;
 import com.inkwave.backend.model.User;
 import com.inkwave.backend.repository.UserRepository;
 import com.inkwave.backend.util.JwtUtil;
@@ -18,34 +21,32 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public String register(User user) {
-        // Check if username already exists
         Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
         if (existingUser.isPresent()) {
-            return "Username already taken!";
+            throw new AuthenticationException("Username already taken!");
         }
 
-        // Check if email already exists
         Optional<User> existingEmail = userRepository.findByEmail(user.getEmail());
         if (existingEmail.isPresent()) {
-            return "Email already registered!";
+            throw new AuthenticationException("Email already registered!");
         }
 
-        // Encode the password and set default role
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("USER"); // Default role
+            user.setRole("USER");
         }
 
-        // Save the user to the database
         userRepository.save(user);
         return "User registered successfully!";
     }
 
-    public String login(User user) {
+    public AuthResponse login(User user) {
         Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
-            return jwtUtil.generateToken(user.getUsername());
+        if (existingUser.isEmpty() || !passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
+            throw new AuthenticationException("Invalid username or password");
         }
-        return "Invalid username or password";
+
+        String token = jwtUtil.generateToken(user.getUsername());
+        return new AuthResponse(true, "Login successful", token);
     }
 }
