@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import jwtDecode from "jwt-decode"; // Correct default import for jwt-decode
+import {jwtDecode} from "jwt-decode"; // Correct default import for jwt-decode
 
 export default function Login() {
   const [username, setUsername] = useState("");
