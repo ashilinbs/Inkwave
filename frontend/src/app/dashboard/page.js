@@ -51,7 +51,7 @@ export default function Dashboard() {
               Create, edit, and delete your blog posts with ease.
             </p>
             <Link
-              href="/dashboard/posts"
+              href="api/create"
               className="mt-4 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
             >
               Go to Posts
